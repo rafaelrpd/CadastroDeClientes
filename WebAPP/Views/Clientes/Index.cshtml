@@ -10,6 +10,35 @@
     <a asp-action="Create">Novo Cliente</a>
 </p>
 
+<p>Pesquisar clientes</p>
+<div class="container">
+    <form asp-controller="Clientes" asp-action="Buscar" method="get">
+        <div class="input-group">
+            <label class="input-group-text">@Html.Label("CPF")</label>
+            <input type="text" class="form-control" placeholder="11345678900" name="cpf" value="@ViewData["cpf"]" />
+            <label class="input-group-text">@Html.Label("Nome")</label>
+            <input type="text" class="form-control" placeholder="" name="nome" value="@ViewData["nome"]" />
+            <label class="input-group-text">@Html.Label("Data Nascimento")</label>
+            <input type="date" class="form-control" placeholder="" name="dataNascimento" value="@ViewData["dataNascimento"]" />
+            @*<label class="input-group-text">@Html.Label("Sexo")</label>
+            <input type="radio" class="form-control" placeholder="M" name="sexo" value="@ViewData["sexo"]" />
+            <input type="radio" class="form-control" placeholder="F" name="sexo" value="@ViewData["sexo"]" />*@
+        </div>
+        @*<div class="input-group">
+            <label class="input-group-text">@Html.Label("Estado")</label>
+            <select name="estado" class="form-control" asp-items="@Model.Estados"></select>
+            <label class="input-group-text">@Html.Label("Cidade")</label>
+            <select name="cidade" class="form-control" asp-items="@Model.Cidades"></select>
+        </div>*@
+        <div class="form-group">
+            <input type="submit" value="Pesquisar" class="btn btn-primary" />
+            <input type="reset" value="Limpar" class="btn btn-secondary" />
+            <a asp-action="Index" class="btn btn-info">Voltar</a>
+        </div>
+        
+    </form>
+</div>
+
 <table class="table">
     <thead>
         <tr>
