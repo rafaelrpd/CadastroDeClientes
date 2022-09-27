@@ -14,6 +14,8 @@ namespace WebAPP.Data
         {
         }
 
-        public DbSet<WebAPP.Models.Cliente> Cliente { get; set; } = default!;
+        public DbSet<Cliente> Cliente { get; set; } = default!;
+        public DbSet<Cidade> Cidade { get; set; } = default!;
+        public DbSet<Estado> Estado { get; set; } = default!;
     }
 }
