@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebAPP.Data;
 using WebAPP.Models;
+using WebAPP.ViewModel;
 
 namespace WebAPP.Controllers
 {
@@ -18,10 +19,28 @@ namespace WebAPP.Controllers
         // GET: Clientes
         public async Task<IActionResult> Index()
         {
-            var webAPPContext = _context.Cliente.Include(c => c.Cidade);
-            return View(await webAPPContext.ToListAsync());
+            var clientes = _context.Cliente
+                .Include(c => c.Cidade)
+                .Include(e => e.Cidade.Estado)
+                .ToList();
+
+            string cpf = string.Empty;
+            string nome = string.Empty;
+            DateTime? dataNascimento = null;
+            string sexo = string.Empty;
+            string estado = string.Empty;
+            string cidade = string.Empty;
+
+
+            var clientesListarViewModel = new ClientesListarViewModel
+            {
+                Clientes = clientes
+            };
+
+            return View(clientesListarViewModel);
         }
 
+        // Não estou usando
         // GET: Clientes/Details/5
         public async Task<IActionResult> Details(string id)
         {
@@ -44,7 +63,8 @@ namespace WebAPP.Controllers
         // GET: Clientes/Create
         public IActionResult Create()
         {
-            ViewData["CidadeId"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "CidadeId");
+            ViewData["Cidade"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "Nome");
+            ViewData["Estado"] = new SelectList(_context.Set<Estado>(), "EstadoId", "Sigla");
             return View();
         }
 
@@ -55,30 +75,49 @@ namespace WebAPP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Cpf,Nome,DataNascimento,Sexo,Endereco,CidadeId")] Cliente cliente)
         {
+            var cidade = await _context.Cidade
+                .Include(e => e.Estado)
+                .FirstOrDefaultAsync(c => c.CidadeId == cliente.CidadeId);
+            cliente.Cidade = cidade;
+            ModelState.Clear();
+            TryValidateModel(cliente);
+
             if (ModelState.IsValid)
             {
                 _context.Add(cliente);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CidadeId"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "CidadeId", cliente.CidadeId);
+            ViewData["Cidade"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "Nome", cliente.CidadeId);
+            ViewData["Estado"] = new SelectList(_context.Set<Estado>(), "EstadoId", "Sigla", cliente.Cidade.EstadoId);
+            //ViewData["CidadeId"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "CidadeId", cliente.CidadeId);
+            //ViewData["EstadoId"] = new SelectList(_context.Set<Estado>(), "EstadoId", "EstadoId", cliente.Cidade.EstadoId);
             return View(cliente);
         }
 
         // GET: Clientes/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
+            
             if (id == null || _context.Cliente == null)
             {
                 return NotFound();
             }
 
-            var cliente = await _context.Cliente.FindAsync(id);
+            var cliente = await _context.Cliente
+                .Include(c => c.Cidade)
+                .FirstOrDefaultAsync(c => c.Cpf == id);
+            
             if (cliente == null)
             {
                 return NotFound();
             }
-            ViewData["CidadeId"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "CidadeId", cliente.CidadeId);
+
+            ViewData["Cidade"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "Nome", cliente.CidadeId);
+            ViewData["Estado"] = new SelectList(_context.Set<Estado>(), "EstadoId", "Sigla", cliente.Cidade.EstadoId);
+
+            //ViewData["CidadeId"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "CidadeId", cliente.CidadeId);
+            //ViewData["EstadoId"] = new SelectList(_context.Set<Estado>(), "EstadoId", "EstadoId", cliente.Cidade.EstadoId);
             return View(cliente);
         }
 
@@ -93,6 +132,13 @@ namespace WebAPP.Controllers
             {
                 return NotFound();
             }
+
+            var cidade = await _context.Cidade
+                .Include(e => e.Estado)
+                .FirstOrDefaultAsync(c => c.CidadeId == cliente.CidadeId);
+            cliente.Cidade = cidade;
+            ModelState.Clear();
+            TryValidateModel(cliente);
 
             if (ModelState.IsValid)
             {
@@ -114,7 +160,9 @@ namespace WebAPP.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CidadeId"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "CidadeId", cliente.CidadeId);
+            ViewData["Cidade"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "Nome", cliente.CidadeId);
+            ViewData["Estado"] = new SelectList(_context.Set<Estado>(), "EstadoId", "Sigla", cliente.Cidade.EstadoId);
+            //ViewData["CidadeId"] = new SelectList(_context.Set<Cidade>(), "CidadeId", "CidadeId", cliente.CidadeId);
             return View(cliente);
         }
 
@@ -128,6 +176,7 @@ namespace WebAPP.Controllers
 
             var cliente = await _context.Cliente
                 .Include(c => c.Cidade)
+                .Include(e => e.Cidade.Estado)
                 .FirstOrDefaultAsync(m => m.Cpf == id);
             if (cliente == null)
             {
@@ -146,7 +195,9 @@ namespace WebAPP.Controllers
             {
                 return Problem("Entity set 'WebAPPContext.Cliente'  is null.");
             }
-            var cliente = await _context.Cliente.FindAsync(id);
+            var cliente = await _context.Cliente
+                .Include(c => c.Cidade)
+                .FirstOrDefaultAsync(c => c.Cpf == id);
             if (cliente != null)
             {
                 _context.Cliente.Remove(cliente);
