@@ -23,13 +23,46 @@ namespace WebAPI.Controllers
 
         // GET: api/Clientes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ClienteDTO>>> GetCliente()
+        public async Task<ActionResult<IEnumerable<ClienteDTO>>> GetCliente(string? cpf, string? nome, DateTime? dataNascimento, string? sexo, string? estado, string? cidade)
         {
             if (_context.Cliente == null)
             {
                 return NotFound();
             }
-            return await _context.Cliente
+
+            var query = _context.Cliente.AsQueryable();
+
+            if (cpf != null)
+            {
+                query = query.Where(c => c.Cpf.Equals(cpf));
+            }
+
+            if (nome != null)
+            {
+                query = query.Where(c => c.Nome.Contains(nome));
+            }
+
+            if (dataNascimento != null)
+            {
+                query = query.Where(c => c.DataNascimento.Equals(dataNascimento));
+            }
+
+            if (sexo != null)
+            {
+                query = query.Where(c => c.Sexo.Equals(sexo));
+            }
+
+            if (estado != null)
+            {
+                query = query.Where(c => c.Cidade.Estado.Nome.Contains(estado));
+            }
+
+            if (cidade != null)
+            {
+                query = query.Where(c => c.Cidade.Nome.Contains(cidade));
+            }
+
+            return await query
                 .Include(c => c.Cidade)
                 .Include(e => e.Cidade.Estado)
                 .Select(x => ClienteParaDTO(x))
@@ -106,7 +139,7 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Cliente>> PostCliente(ClienteDTO clienteDTO)
         {
-            if (_context.Cidade == null)
+            if (_context.Cliente == null)
             {
                 return Problem("Entity set 'WebAPIContext.Cliente'  is null.");
             }
