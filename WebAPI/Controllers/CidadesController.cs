@@ -165,14 +165,6 @@ namespace WebAPI.Controllers
             return _context.Cidade.Any(e => e.CidadeId == id);
         }
 
-        static EstadoDTO EstadoParaDTO(Estado estado) =>
-            new EstadoDTO
-            {
-                EstadoId = estado.EstadoId,
-                Nome = estado.Nome,
-                Sigla = estado.Sigla
-            };
-
         static CidadeDTO CidadeParaDTO(Cidade cidade) =>
             new CidadeDTO
             {
