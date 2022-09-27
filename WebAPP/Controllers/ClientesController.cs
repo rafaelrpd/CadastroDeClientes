@@ -34,7 +34,9 @@ namespace WebAPP.Controllers
 
             var clientesListarViewModel = new ClientesListarViewModel
             {
-                Clientes = clientes
+                Clientes = clientes,
+                Cidades = new SelectList(_context.Set<Cidade>(), "CidadeId", "Nome"),
+                Estados = new SelectList(_context.Set<Estado>(), "EstadoId", "Sigla")
             };
 
             return View(clientesListarViewModel);
@@ -98,7 +100,7 @@ namespace WebAPP.Controllers
         // GET: Clientes/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            
+
             if (id == null || _context.Cliente == null)
             {
                 return NotFound();
@@ -107,7 +109,7 @@ namespace WebAPP.Controllers
             var cliente = await _context.Cliente
                 .Include(c => c.Cidade)
                 .FirstOrDefaultAsync(c => c.Cpf == id);
-            
+
             if (cliente == null)
             {
                 return NotFound();
@@ -202,14 +204,56 @@ namespace WebAPP.Controllers
             {
                 _context.Cliente.Remove(cliente);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        public IActionResult Buscar(string? cpf, string? nome, DateTime? dataNascimento, string? sexo, string? estado, string? cidade)
+        {
+            IEnumerable<Cliente> clientes;
+
+            var query = _context.Cliente.AsQueryable();
+
+            if (cpf != null)
+            {
+                query = query.Where(c => c.Cpf.Equals(cpf));
+            }
+
+            if (nome != null)
+            {
+                query = query.Where(c => c.Nome.Contains(nome));
+            }
+            if (dataNascimento != null)
+            {
+                query = query.Where(c => c.DataNascimento.Equals(dataNascimento));
+            }
+
+            if (sexo != null)
+            {
+                query = query.Where(c => c.Sexo.Equals(sexo));
+            }
+            if (estado != null)
+            {
+                query = query.Where(c => c.Cidade.Estado.Nome.Contains(estado));
+            }
+
+            if (cidade != null)
+            {
+                query = query.Where(c => c.Cidade.Nome.Contains(cidade));
+            }
+
+            clientes = query.ToList();
+
+            return View("~/Views/Clientes/Index.cshtml", new ClientesListarViewModel
+            {
+                Clientes = clientes
+            });
+        }
+
         private bool ClienteExists(string id)
         {
-          return _context.Cliente.Any(e => e.Cpf == id);
+            return _context.Cliente.Any(e => e.Cpf == id);
         }
     }
 }
