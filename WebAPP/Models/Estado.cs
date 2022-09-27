@@ -23,6 +23,7 @@ namespace WebAPP.Models
         [Column("sigla")]
         [StringLength(2)]
         [Unicode(false)]
+        [Display(Name = "Estado")]
         public string Sigla { get; set; } = null!;
 
         [InverseProperty("Estado")]
