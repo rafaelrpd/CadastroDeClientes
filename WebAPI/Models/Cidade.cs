@@ -29,4 +29,19 @@ namespace WebAPI.Models
         [InverseProperty("Cidade")]
         public virtual ICollection<Cliente> Clientes { get; set; }
     }
+
+    public class CidadeDTO
+    {
+        public int CidadeId { get; set; }
+        public string CidadeNome { get; set; } = null!;
+        public int EstadoId { get; set; }
+        public string EstadoNome { get; set; } = null!;
+    }
+
+    public class CidadePostDTO
+    {
+        public string CidadeNome { get; set; } = null!;
+        public int EstadoId { get; set; }
+        public string EstadoNome { get; set; } = null!;
+    }
 }
